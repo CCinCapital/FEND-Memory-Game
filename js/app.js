@@ -26,6 +26,51 @@ const PAPER_PLANE = 'fa-paper-plane-o'
 
 
 
+const Node = function(type) {
+  let obj = document.createElement(type)
+
+  obj.appendThisNodeUnder = function(node) {
+    node.appendChild(obj)
+  }
+
+  obj.hasClass = function(cls) {
+    let patt1 = new RegExp(cls)
+    return patt1.test(this.className)
+  }
+
+  obj.addClass = function(cls) {
+    if( !this.hasClass(cls) ) {
+      if( this.className !== '' ) {
+        this.className += ' ' + cls
+      }
+      else {
+        this.className = cls
+      }
+    }
+  }
+
+  obj.removeClass = function(cls) {
+    if( this.hasClass(cls) ) {
+      let patt1 = new RegExp(cls)
+      this.className = this.className.replace(patt1, ' ')
+      let patt2 = new RegExp('  ')
+      this.className = this.className.replace(patt2, '')
+    }
+  }
+
+  obj.toggleClass = function(cls) {
+    if( this.hasClass(cls) ) {
+      this.removeClass(cls)
+    }
+    else {
+      this.addClass(cls)
+    }
+  }
+
+  return obj
+}
+
+
 
 
 /*
