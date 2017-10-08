@@ -72,6 +72,17 @@ const Node = function(type) {
 
 
 
+const Card = function() {
+  let obj = new Node('li')
+
+  obj.addClass('card')
+
+  obj.addEventListener('click', function(){
+    this.toggleClass(SHOW + ' ' + OPEN)
+  })
+
+  return obj
+}
 
 /*
  * Display the cards on the page
