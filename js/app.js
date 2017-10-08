@@ -84,6 +84,71 @@ const Card = function() {
   return obj
 }
 
+
+
+const Board = function() {
+
+  const obj = new Node('ul')
+
+  obj.size = 16
+
+  obj.cards = []
+
+  obj.deck = [ANCHOR, ANCHOR, 
+              BOLT, BOLT, 
+              BOMB, BOMB, 
+              BICYCLE, BICYCLE, 
+              CUBE, CUBE, 
+              DIAMOND, DIAMOND,
+              LEAF, LEAF,
+              PAPER_PLANE, PAPER_PLANE]
+
+  obj.initBoard = function() {
+    this.addClass('deck')
+    this.appendThisNodeUnder(document.getElementById('container'))
+
+    for(let c = 0; c < this.size; c++) {
+      const card = new Card()
+
+      this.cards.push(card)
+      this.appendChild(card)
+    }
+
+    this.populateBoard()
+  }
+
+  obj.resetBoard = function() {
+    this.cards.forEach(function(card){
+      card.innerHTML = ''
+    })
+
+    this.populateBoard()
+  }
+
+  obj.populateBoard = function() {
+    this.shuffle()
+    for(card in this.cards) {
+      this.cards[card].innerHTML = `<i class='fa ${this.deck[card]}'></i>`
+    }
+  }
+
+  obj.shuffle = function() {
+    var currentIndex = this.deck.length, temporaryValue, randomIndex
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex)
+        currentIndex -= 1
+        temporaryValue = this.deck[currentIndex]
+        this.deck[currentIndex] = this.deck[randomIndex]
+        this.deck[randomIndex] = temporaryValue
+    }
+    return this.deck
+  }
+
+  return obj
+}
+
+
+
 /*
  * Display the cards on the page
  *   - shuffle the list of cards using the provided "shuffle" method below
