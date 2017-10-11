@@ -2,6 +2,17 @@
 const BASE_CARD_CLASS = 'card'
 const BASE_CARD_ICON_CLASS = 'fa'
 
+// game state
+const RUN = true
+const STOP = false
+
+// game judge
+const CHECK_MATCH = 'CHECK_MATCH'
+
+const TAG_NAME_CARD = 'LI'
+
+const DELAY = 500
+
 // star counter
 const STAR = 'fa-star' 
 const FULL_STAR = 3
@@ -26,39 +37,56 @@ const PAPER_PLANE = 'fa-paper-plane-o'
 
 
 
-const Node = function(type) {
-  let obj = document.createElement(type)
+let cardsBuffer = []  
+let totalCards = 16
+let matched = 0
+let cards = []
+let deck = [ANCHOR, BOLT, BOMB, BICYCLE, CUBE, DIAMOND, LEAF, PAPER_PLANE,
+            ANCHOR, BOLT, BOMB, BICYCLE, CUBE, DIAMOND, LEAF, PAPER_PLANE]
 
-  obj.appendThisNodeUnder = function(node) {
-    node.appendChild(obj)
+
+const Node = function({ nodeName, className = null, listener = null }) {
+  if(nodeName) {
+    this.domNode = document.createElement(nodeName)    
   }
 
-  obj.hasClass = function(cls) {
+  if(className) {
+    this.addClass(className)
+  }
+
+  if(listener) {
+    this.domNode.addEventListener(listener.event, function(evt) {
+      listener.handleEvent(evt)
+    })
+  }
+}
+Node.prototype = {
+  appendThisNodeUnder: function(parentNode) {
+    parentNode.appendChild(this.domNode)
+  },
+  hasClass: function(cls) {
     let patt1 = new RegExp(cls)
-    return patt1.test(this.className)
-  }
-
-  obj.addClass = function(cls) {
+    return patt1.test(this.domNode.className)
+  },
+  addClass: function(cls) {
     if( !this.hasClass(cls) ) {
-      if( this.className !== '' ) {
-        this.className += ' ' + cls
+      if( this.domNode.className !== '' ) {
+        this.domNode.className += ' ' + cls
       }
       else {
-        this.className = cls
+        this.domNode.className = cls
       }
     }
-  }
-
-  obj.removeClass = function(cls) {
+  },
+  removeClass: function(cls) {
     if( this.hasClass(cls) ) {
       let patt1 = new RegExp(cls)
-      this.className = this.className.replace(patt1, ' ')
+      this.domNode.className = this.domNode.className.replace(patt1, ' ')
       let patt2 = new RegExp('  ')
-      this.className = this.className.replace(patt2, '')
+      this.domNode.className = this.domNode.className.replace(patt2, '')
     }
-  }
-
-  obj.toggleClass = function(cls) {
+  },
+  toggleClass: function(cls) {
     if( this.hasClass(cls) ) {
       this.removeClass(cls)
     }
@@ -66,77 +94,77 @@ const Node = function(type) {
       this.addClass(cls)
     }
   }
+}
+
+const Card = function() {
+  const obj = new Node({
+    nodeName: 'li', 
+    className: 'card', 
+  })
 
   return obj
 }
 
-
-
 const Board = function() {
-  const obj = new Node('ul')
+  const obj = new Node({ 
+    nodeName: 'ul',
+    className: 'deck',
+    listener: {
+      event: 'click',
+      handleEvent: function(e) {
+        if(e.target.tagName == TAG_NAME_CARD) {
+          let card = cards.filter(function(card) {
+            return card.domNode.isSameNode(e.target)
+          })[0]
 
-  let totalCards = 16
+          if(card.hasClass(SHOW)) {
+            return
+          }
 
-  let matched = 0
+          card.addClass(OPEN + ' ' + SHOW)
+          // add the card to a *list* of "open" cards
+          cardsBuffer.push(card)
 
-  let cards = []
-
-  let cardsBuffer = []
-
-  let deck = [ANCHOR, ANCHOR, 
-              BOLT, BOLT, 
-              BOMB, BOMB, 
-              BICYCLE, BICYCLE, 
-              CUBE, CUBE, 
-              DIAMOND, DIAMOND,
-              LEAF, LEAF,
-              PAPER_PLANE, PAPER_PLANE]
+          gameLogic()
+        }
+      }
+    }
+  })
 
   obj.initBoard = function() {
-    this.addClass('deck')
     this.appendThisNodeUnder(document.getElementById('container'))
 
-    this.addEventListener('click', function(event) {
-      handleClick(event)
-    })
-
-// Loop through each card and create its HTML
+    // Loop through each card and create its HTML
     for(let c = 0; c < totalCards; c++) {
-      const card = new Node('li')
-      card.addClass('card')
-
+      const card = new Card()
       cards.push(card)
 
       // Add each card's HTML to the page
-      this.appendChild(card)
+      this.domNode.appendChild(card.domNode)
     }
 
-    this.populateBoard()
+    populateBoard()
   }
 
-  obj.resetBoard = function() {
+  const resetBoard = function() {
     cards.forEach(function(card){
-      card.innerHTML = ''
+      card.domNode.innerHTML = ''
     })
-
-    this.populateBoard()
+    populateBoard()
   }
 
-  obj.populateBoard = function() {
-// shuffle the list of cards using the provided "shuffle" method    
-    this.shuffle()
+  const populateBoard = function() {
+    // shuffle the list of cards using the provided "shuffle" method    
+    shuffle()
 
     for(card in cards) {
-      cards[card].innerHTML = `<i class='fa ${deck[card]}'></i>`
+      // display the card's symbol
+      cards[card].domNode.innerHTML = `<i class='fa ${deck[card]}'></i>`
     }
   }
 
-  obj.judgeCards = function() {
-    return cardsBuffer[0] === cardsBuffer[1]
-  }
-
-// Shuffle function from http://stackoverflow.com/a/2450976
-  obj.shuffle = function() {
+  // Shuffle function from http://stackoverflow.com/a/2450976
+  const shuffle = function() {
     var currentIndex = deck.length, temporaryValue, randomIndex
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex)
@@ -148,43 +176,50 @@ const Board = function() {
     return deck
   }
 
-  obj.run = function() {
-    this.initBoard()
-
-// if all cards have matched, display a message with the final score
-    if( matched === totalCards ) {
-      return alertFinalScore()
-    }
-
-// add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
-    this.waitForUser()
-
-// if the list already has another card, check to see if the two cards match    
-    this.judgeCards()
-  }
-
-// display the card's symbol
-  let handleClick = function(event) {
-    if(event.target.nodeName === 'LI') {
-      console.log(event.target)
-    }
-  }
-
-  let alertFinalScore = function() {
-    console.log('final score')
-  }
-
   return obj
 }
 
+const Game = function() {
+  this.board = new Board()
+}
+Game.prototype.run = function() {
+  this.board.initBoard()
+}
+
+
+function gameLogic() {
+  if(cardsBuffer.length === 2) {
+    if(cardsBuffer[0].domNode.isEqualNode(cardsBuffer[1].domNode)) {
+      setTimeout(function() {
+        cardsBuffer[0].removeClass(OPEN)
+        cardsBuffer[1].removeClass(OPEN)
+        cardsBuffer = []
+      }, DELAY)
+    }
+    else {
+      setTimeout(function() {            
+        cardsBuffer[0].removeClass(OPEN + ' ' + SHOW)
+        cardsBuffer[1].removeClass(OPEN + ' ' + SHOW)
+        cardsBuffer = []
+      }, DELAY)
+    }
+  }
+
+  // if all cards have matched, display a message with the final score
+  if( matched === totalCards ) {
+    return alertFinalScore()
+  }
+
+}
 
 
 function startGame() {
-  const game = new Board()
+  const game = new Game()
   game.run()
 }
 
 
+startGame()
 /*
  *  - 
  *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
@@ -192,6 +227,5 @@ function startGame() {
  *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
  *    + 
 */
-
 
 
