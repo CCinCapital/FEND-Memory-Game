@@ -211,7 +211,7 @@ const MoveCounter = function() {
 const RestartBtn = function() {
   const obj = new Node({
     nodeName: 'div',
-    className: 'restart',
+    className: 'restartBtn',
     innerHTML: `<i class='fa fa-repeat'></i>`,  // img of this button
     eventListener: {
       event: 'click',
