@@ -1,3 +1,7 @@
+/*
+Supported Min-Width: 360px; (nexus 5).
+*/
+
 html {
     box-sizing: border-box;
 }
@@ -33,27 +37,31 @@ body {
     font-weight: 300;
 }
 
+.score-panel {
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.restartBtn {
+    display: inline-block;
+    float: right;
+}
+
 /*
  * Styles for the deck of cards
  */
-
 .deck {
-    width: 660px;
-    min-height: 680px;
     background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
-    padding: 32px;
-    border-radius: 10px;
-    box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    border-radius: 10px;
+    box-shadow: 12px 15px 20px 0 rgba(46, 61, 73, 0.5); 
     margin: 0 0 3em;
 }
 
 .deck .card {
-    height: 125px;
-    width: 125px;
     background: #2e3d49;
     font-size: 0;
     color: #ffffff;
@@ -65,10 +73,223 @@ body {
     box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
 }
 
-.deck .card.show {
-    font-size: 33px;    
+/*
+ * Styles for the Score Panel
+ */
+.score-panel .stars {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    margin: 0 5px 0 0;
 }
 
+.score-panel .stars li {
+    list-style: none;
+    display: inline-block;
+}
+
+.score-panel .restart {
+    float: right;
+    cursor: pointer;
+}
+
+/*
+ * Styles for the Endgame Modal
+ */
+.modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9;
+    visibility: hidden;
+}
+
+.modal.visible {
+    visibility: visible;
+}
+
+.modal.overlay {
+    background-color: rgba(211, 211, 211, 0.5);
+    visibility: inherit;
+}
+
+.modal.panel {
+    border-radius: 10px;
+    text-align: center;
+    margin: auto;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 1);
+    visibility: inherit;
+}
+
+.modal.panel .stars {
+    padding: 0;
+    font-size: 25px;
+}
+
+.modal.panel .panel-okBtn {
+    width: 80%;
+    height: 40px;
+    font-size: 20px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: #fff;
+    border-radius: 5px;
+    background-color: green;
+}
+
+.modal.panel .stars li {
+    padding: 10px;
+    list-style: none;
+    display: inline-block;
+}
+
+
+/* game - Mobile */
+@media screen and (max-width: 660px) {
+    h1 {
+        font-size: 40px;
+    }
+
+    .score-panel {
+        width: 80%;
+        max-width: 400px;
+        font-size: 26px;
+    }
+
+    .restartBtn {
+        margin-top: -5px;
+        padding: 5px 30px 5px 30px;
+        border-radius: 10px;
+        background-color: #8ff2c9;
+    }
+
+    .deck {
+        min-width: 350px;
+        height: 0;
+        width: 96%;      
+        padding-top: 5%;
+        padding-right: 5%;
+        padding-left: 5%;
+        padding-bottom: 91%; /* height=width, base on parent's width*/
+        /*margin-top: 30px;*/
+    }
+
+    .deck .card {
+        min-width: 20px;
+        width: 24%;
+        height: 0;
+        margin-bottom: 1%;
+        padding-top: 12%;    /* height=width, base on parent's width*/
+        padding-bottom: 12%; /* 'padding-top' + 'padding-bottom' = height */
+    }
+
+    .deck .card.show {
+        font-size: 33px;    
+    }
+}
+/* game -Other */
+@media screen and (min-width: 661px) {
+    h1 {
+        font-size: 60px;
+    }
+
+    .score-panel {
+        font-size: 25px;
+        width: 445px;
+    }
+
+    .deck {
+        /*margin-top: 40px;*/
+        width: 660px;
+        min-height: 680px;
+        padding: 32px;
+    }
+
+    .deck .card {
+        height: 125px;
+        width: 125px;
+    }
+
+    .deck .card.show {
+        font-size: 33px;    
+    }   
+}
+
+/* modal - mobile */
+@media screen and (max-width: 460px) {
+    .modal.panel {
+        width: 80%;
+        height: 0;
+        padding: 10px;
+        padding-bottom: 90%;
+    }
+
+    .modal.panel .stars {
+        margin: 10px 0 -10px 0;
+        padding: 0;
+        font-size: 30px;
+    }
+
+    .modal.panel .panel-gratz {
+        font-size: 30px;
+    }
+
+    .modal.panel .panel-msg {
+        font-size: 18px;
+    }
+
+    .modal.panel .panel-okBtn {
+        width: 80%;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .modal.panel .stars li {
+        padding: 10px;
+    } 
+}
+/* modal - other */
+@media screen and (min-width: 461px) {
+    .modal.panel {
+        width: 80%;
+        max-width: 400px;
+        height: 500px;
+        padding: 10px;
+    }
+
+    .modal.panel .panel-gratz {
+        font-size: 40px;
+        padding: 10px;
+        padding-top: 0;
+    }
+
+    .modal.panel .panel-msg {
+        font-size: 25px;
+        padding: 10px;
+    }
+
+    .modal.panel .stars {
+        margin: 10px;
+        padding: 25px 0 0 0;
+        font-size: 40px;
+    }
+
+    .modal.panel .panel-okBtn {
+        width: 80%;
+        height: 50px;
+        font-size: 35px;
+    }
+
+    .modal.panel .stars li {
+        padding: 10px;
+    }  
+}
+
+
+/* card - animation */
 .deck .card.open {
     background: #02b3e4;
     -webkit-animation-name: open;
@@ -77,24 +298,6 @@ body {
     -webkit-animation-timing-function: ease-in;
     cursor: default;
 }
-
-.deck .card.match {
-    background-color: green;
-    -webkit-animation-duration: 500ms;    
-    -webkit-animation-iteration-count: 1;
-    -webkit-animation-timing-function: linear; 
-    -webkit-animation-name: match;
-
-}
-
-.deck .card.not-match {
-    background-color: red;
-    -webkit-animation-name: not-match;
-    -webkit-animation-duration: 400ms;    
-    -webkit-animation-iteration-count: 1;
-    -webkit-animation-timing-function: linear;
-}
-
 @-webkit-keyframes open {
     0% {
         -webkit-transform:rotateY(0deg); 
@@ -103,7 +306,13 @@ body {
         -webkit-transform:rotateY(180deg); 
     }
 }
-
+.deck .card.match {
+    background-color: green;
+    -webkit-animation-duration: 500ms;    
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: linear; 
+    -webkit-animation-name: match;
+}
 @-webkit-keyframes match {
     0% {
         -webkit-transform:scale(1,1); 
@@ -121,7 +330,13 @@ body {
         -webkit-transform:scale(1,1); 
     }
 }
-
+.deck .card.not-match {
+    background-color: red;
+    -webkit-animation-name: not-match;
+    -webkit-animation-duration: 400ms;    
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: linear;
+}
 @-webkit-keyframes not-match {
     0% {
         -webkit-transform:translate(0,0)rotate(0deg); 
@@ -156,84 +371,4 @@ body {
     100% {
         -webkit-transform:translate(-10px,0px)rotate(-3deg); 
     }    
-}
-
-/*
- * Styles for the Score Panel
- */
-
-.score-panel {
-    text-align: left;
-    width: 345px;
-    margin-bottom: 10px;
-}
-
-.score-panel .stars {
-    margin: 0;
-    padding: 0;
-    display: inline-block;
-    margin: 0 5px 0 0;
-}
-
-.score-panel .stars li {
-    list-style: none;
-    display: inline-block;
-}
-
-.score-panel .restart {
-    float: right;
-    cursor: pointer;
-}
-
-.modal {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 9;
-    visibility: hidden;
-}
-
-.modal.panel {
-    width: 400px;
-    height: 400px;
-    padding: 30px;
-    border-radius: 10px;
-    text-align: center;
-    margin: auto;
-    z-index: 10;
-    background-color: rgba(255, 255, 255, 1);
-    visibility: inherit;
-}
-
-.modal.panel .stars {
-    padding: 0;
-    font-size: 25px;
-}
-
-.modal.panel .panel-okBtn {
-    width: 80%;
-    height: 40px;
-    font-size: 20px;
-    text-transform: uppercase;
-    font-weight: 400;
-    color: #fff;
-    border-radius: 5px;
-    background-color: green;
-}
-
-.modal.panel .stars li {
-    padding: 10px;
-    list-style: none;
-    display: inline-block;
-}
-
-.modal.overlay {
-    background-color: rgba(255, 255, 255, 0.5);
-    visibility: inherit;
-}
-
-.modal.visible {
-    visibility: visible;
 }
