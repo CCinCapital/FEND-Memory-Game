@@ -38,6 +38,8 @@ let totalCards = DECK.length          // # of cards in deck
 let matched = 0                       // # of cards matched by user
 let moves = 0                         // # of user's click moves, 
 
+let timerStarted = false
+
 let timeOutID = null                  // ID of setTimeout(), used to clear the timeout function
 let scoreUpdateIntervalID = null
 
@@ -478,7 +480,6 @@ const Game = function() {
     this.mountChildrenNodes()                   // mount all children Node() and their children Node()
 
     board.showCardsFor(CARDS_DISPLAY_DURATION)  // let user memorize the boards for a duration
-    scorePanel.timer.start()
   }
 
   obj.restart = function() { 
@@ -486,7 +487,6 @@ const Game = function() {
     board.reset()
 
     board.showCardsFor(CARDS_DISPLAY_DURATION)
-    scorePanel.timer.restart()
   }
 
   // expose
@@ -507,6 +507,11 @@ function gameLogic(e) {
                                                             //  - (card DOM node has 'card' className)
 
   if(targetIsCard) {                                        // if the target is a 'card' DOM node
+    if(!timerStarted) {
+      timerStarted = true
+      game.scorePanel.timer.start()
+    }
+
     let card = game.board.cards.filter(function(card) {     // find the DOM node's Node() object
       return card.domNode.isSameNode(e.target)              // by test all cards in the cards[] of Board() object
     })[0]                                                   // - position [0] contains the Node() object
@@ -592,6 +597,7 @@ function restart() {
   currentScore = INITIAL_SCORE
   matched = 0
   moves = 0
+  timerStarted = false
 
   game.restart()
   updateScore()
@@ -600,7 +606,6 @@ function restart() {
 function updateScore() {
   // reduce score & star based on game time and # of moves
   scoreUpdateIntervalID = setInterval(function(){
-    
     // decide star rating
     if(currentScore > FIRST_STAR_CUTOFF) {
       currentStar = TOTAL_STAR
@@ -618,7 +623,7 @@ function updateScore() {
     // update the star rating
     game.scorePanel.stars.showFullyFilledStars(currentStar)
 
-    if(game_over) {                                         // if game ended
+    if(game_over || !timerStarted) {                                         // if game ended
       clearInterval(scoreUpdateIntervalID)
       game.scorePanel.timer.stop()
     }
