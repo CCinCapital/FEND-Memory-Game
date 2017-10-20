@@ -40,7 +40,7 @@ let matched = 0                       // # of cards matched by user
 let moves = 0                         // # of user's click moves, 
 
 let timeOutID = null                  // ID of setTimeout(), used to clear the timeout function
-
+let scoreUpdateIntervalID = null
 // 
 const Node = function({ 
   nodeName,             // required, must be same as *element.nodeName, <li></li> should put 'LI', <div></div> should put 'DIV'...
@@ -578,9 +578,28 @@ function gameLogic(e) {
 
 function startGame() {
   game.run()
+  scoreUpdate()
+} 
 
+function restart() {
+                          // to avoid user spamming the reset button => setTimeout() stacks up => board flickers after CARD_DISPLAY_DURATION.
+  clearTimeout(timeOutID) // clear the timer set by board.showCardsFor(duration) method if it hasn't expired
+  clearInterval(scoreUpdateIntervalID)
+
+  game_over = false
+  cardsBuffer = []
+  currentStar = TOTAL_STAR
+  currentScore = INITIAL_SCORE
+  matched = 0
+  moves = 0
+
+  game.restart()
+  scoreUpdate()
+}
+
+function scoreUpdate() {
   // reduce score & star based on game time and # of moves
-  let intervalID = setInterval(function(){
+  scoreUpdateIntervalID = setInterval(function(){
     if(!game_over) {                                        // if game is running
       currentScore -= SCORE_DECREMENT_AMOUNT_PER_INTERVAL   // currentScore - SCORE_DECREMENT_AMOUNT_PER_INTERVAL
     }
@@ -604,25 +623,11 @@ function startGame() {
 
     if(game_over) {   // this method has to be here rather than with the if(!game_over){}else{} 
                       // otherwise it will skip the final .showFullyFilledStars() update  
-      clearInterval(intervalID)                             // stop the score decrement and game timer
+      clearInterval(scoreUpdateIntervalID)                             // stop the score decrement and game timer
       game.scorePanel.timer.stop()
     }
 
   }, SCORE_DECREMENT_INTERVAL)
-} 
-
-function restart() {
-                          // to avoid user spamming the reset button => setTimeout() stacks up => board flickers after CARD_DISPLAY_DURATION.
-  clearTimeout(timeOutID) // clear the timer set by board.showCardsFor(duration) method if it hasn't expired
-
-  game_over = false
-  cardsBuffer = []
-  currentStar = TOTAL_STAR
-  currentScore = INITIAL_SCORE
-  matched = 0
-  moves = 0
-
-  game.restart()
 }
 
 const game = new Game()
