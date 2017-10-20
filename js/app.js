@@ -39,6 +39,7 @@ let matched = 0                       // # of cards matched by user
 let moves = 0                         // # of user's click moves, 
 
 let timeOutID = null                  // ID of setTimeout(), used to clear the timeout function
+let scoreUpdateIntervalID = null
 
 // 
 const Node = function({ 
@@ -577,9 +578,28 @@ function gameLogic(e) {
 
 function startGame() {
   game.run()
+  updateScore()
+} 
 
+function restart() {
+                          // to avoid user spamming the reset button => setTimeout() stacks up => board flickers after CARD_DISPLAY_DURATION.
+  clearTimeout(timeOutID) // clear the timer set by board.showCardsFor(duration) method if it hasn't expired
+  clearInterval(scoreUpdateIntervalID)
+
+  game_over = false
+  cardsBuffer = []
+  currentStar = TOTAL_STAR
+  currentScore = INITIAL_SCORE
+  matched = 0
+  moves = 0
+
+  game.restart()
+  updateScore()
+}
+
+function updateScore() {
   // reduce score & star based on game time and # of moves
-  let intervalID = setInterval(function(){
+  scoreUpdateIntervalID = setInterval(function(){
     
     // decide star rating
     if(currentScore > FIRST_STAR_CUTOFF) {
@@ -599,25 +619,11 @@ function startGame() {
     game.scorePanel.stars.showFullyFilledStars(currentStar)
 
     if(game_over) {                                         // if game ended
-      clearInterval(intervalID)                             // stop this interval and game timer
+      clearInterval(scoreUpdateIntervalID)
       game.scorePanel.timer.stop()
     }
 
   }, STARS_UPDATE_INTERVAL)
-} 
-
-function restart() {
-                          // to avoid user spamming the reset button => setTimeout() stacks up => board flickers after CARD_DISPLAY_DURATION.
-  clearTimeout(timeOutID) // clear the timer set by board.showCardsFor(duration) method if it hasn't expired
-
-  game_over = false
-  cardsBuffer = []
-  currentStar = TOTAL_STAR
-  currentScore = INITIAL_SCORE
-  matched = 0
-  moves = 0
-
-  game.restart()
 }
 
 const game = new Game()
