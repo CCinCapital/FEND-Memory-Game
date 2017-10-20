@@ -623,8 +623,12 @@ function updateScore() {
     // update the star rating
     game.scorePanel.stars.showFullyFilledStars(currentStar)
 
-    if(game_over || !timerStarted) {                                         // if game ended
+    if(game_over) {                       // if game ended
       clearInterval(scoreUpdateIntervalID)
+      game.scorePanel.timer.stop()
+    }
+
+    if(!timerStarted) {
       game.scorePanel.timer.stop()
     }
 
