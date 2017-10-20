@@ -7,6 +7,9 @@ const CARD_DISPLAY_DURATION = 600
 const TOTAL_STAR = 3
 const INITIAL_SCORE = 10000
 
+// timer 
+const TIMER_UPDATE_INTERVAL = 200
+
 const SCORE_DECREMENT_INTERVAL = 100
 const SCORE_DECREMENT_AMOUNT_PER_INTERVAL = 10
 const SCORE_DECREMENT_AMOUNT_PER_MOVE = 10
@@ -36,7 +39,6 @@ let totalCards = DECK.length          // # of cards in deck
 let matched = 0                       // # of cards matched by user
 let moves = 0                         // # of user's click moves, 
 
-let startTime = new Date().getTime()  // start time of timer, its value created here doesn't matter
 let timeOutID = null                  // ID of setTimeout(), used to clear the timeout function
 
 // 
@@ -197,7 +199,7 @@ const Stars = function() {
 const MoveCounter = function() {
   const obj = new Node({
     nodeName: 'span',
-    className: 'moves',
+    className: 'moveCounter',
     innerHTML: ' 0 Moves ',
   })
 
@@ -224,26 +226,81 @@ const RestartBtn = function() {
   return obj
 }
 
+const Timer = function() {
+  const obj = new Node({
+    nodeName: 'span',
+    className: 'timer',
+    innerHTML: `00:00`,
+    //innerHTML: `00:00:00`, // with hour
+  })
+
+  let startTime = new Date().getTime() // start time of timer, its value created here doesn't matter
+  let timerID = 0                           // ID of the setInterval() function
+  let hours = minutes = seconds = 0         // clock fragments
+
+  obj.start = function() {
+    startTime = new Date().getTime()        // gets the current time
+    this.update()                           // start update the timer
+  }
+
+  obj.stop = function() {
+    clearInterval(timerID)                  // stop the timer
+  }
+
+  obj.restart = function() {
+    clearInterval(timerID)                  // clear the setInterval() set by update function, this is redundent line of code, leave it here for future implementations
+    startTime = new Date().getTime()        // get the current time
+    this.update()                           // start the update
+  }
+
+  obj.update = function() {
+    timerID = setInterval(function(){
+      timePassed = new Date().getTime() - startTime       // in milli seconds
+
+      seconds = parseInt(timePassed / 1000 % 60)          // convert to seconds, and filter out seconds
+      minutes = parseInt(timePassed / 1000 / 60 % 60)     // convert to minutes, and filter out minutes
+
+      if(seconds < 10) seconds = '0'+seconds              // change someting like 12:1 to 12:01
+      if(minutes < 10) minutes = '0'+minutes              // change something like 1:12 to 01:12
+
+      obj.innerHTML(`${minutes}:${seconds}`)
+
+      // hours = parseInt(timePassed / 1000 / 60 / 60 % 24)  // convert to hours, and filter out hours       
+      // if(hours < 10) hours = '0'+hours      // with hour
+      //obj.innerHTML(`${hours}:${minutes}:${seconds}`)  
+    }, TIMER_UPDATE_INTERVAL)
+  }
+
+  obj.getTimePassed = function() {
+    return new Date().getTime() - startTime
+  }
+
+  return obj
+}
+
 const ScorePanel = function() {
   const stars = new Stars()
   const moveCounter = new MoveCounter()
   const restartBtn = new RestartBtn()
+  const timer = new Timer()
 
   const obj = new Node({
     nodeName: 'section',
     className: 'score-panel',
     id: 'score-panel',
-    childrenNodes: [stars, moveCounter, restartBtn],
+    childrenNodes: [stars, moveCounter, restartBtn, timer],
   })
 
   obj.reset = function() {
     stars.update(TOTAL_STAR)  // TOTAL_STAR is 0 upon game reset
     moveCounter.update(moves) // moves is 0 upon game reset
+    timer.restart()
   }
 
   // expose child nodes so other class could call *.stars.*methods outside closure.
   obj.stars = stars 
   obj.moveCounter = moveCounter
+  obj.timer = timer
 
   return obj
 }
@@ -421,14 +478,15 @@ const Game = function() {
     this.mountChildrenNodes()                   // mount all children Node() and their children Node()
 
     board.showCardsFor(CARDS_DISPLAY_DURATION)  // let user memorize the boards for a duration
-
+    scorePanel.timer.start()
   }
 
   obj.restart = function() { 
     scorePanel.reset()
     board.reset()
 
-    board.showCardsFor(CARDS_DISPLAY_DURATION)  
+    board.showCardsFor(CARDS_DISPLAY_DURATION)
+    scorePanel.timer.restart()
   }
 
   // expose
@@ -500,11 +558,11 @@ function gameLogic(e) {
       }
 
       if( matched === totalCards ) {                            // if all cards have been matched
+        game_over = true
 
   // Since the time took by this function is not accounted by 
   // user's playtime, hence it is deducted when giving score.         
-        const gameTimer = new Date().getTime() 
-                          - startTime 
+        const gameTimer = game.scorePanel.timer.getTimePassed()
                           - CARD_DISPLAY_DURATION
                                                                 // display a modal with the final score
         game.modal.stars.update(currentStar)
@@ -520,12 +578,15 @@ function gameLogic(e) {
 
 function startGame() {
   game.run()
-  startTime = new Date().getTime()
 
   // reduce score & star based on game time and # of moves
-  setInterval(function(){
-    if(!game_over) {      // currentScore - 1 every 500ms
-      currentScore -= SCORE_DECREMENT_AMOUNT_PER_INTERVAL
+  let intervalID = setInterval(function(){
+    if(!game_over) {                                        // if game is running
+      currentScore -= SCORE_DECREMENT_AMOUNT_PER_INTERVAL   // currentScore - SCORE_DECREMENT_AMOUNT_PER_INTERVAL
+    }
+    else {                                                  // else
+      clearInterval(intervalID)                             // stop the score decrement and game timer
+      game.scorePanel.timer.stop()
     }
     
     // decide star rating
