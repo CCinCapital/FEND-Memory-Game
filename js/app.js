@@ -12,10 +12,9 @@ const TIMER_UPDATE_INTERVAL = 200
 
 const SCORE_DECREMENT_INTERVAL = 100
 const SCORE_DECREMENT_AMOUNT_PER_INTERVAL = 10
-const SCORE_DECREMENT_AMOUNT_PER_MOVE = 10
 
-const FIRST_STAR_CUTOFF = 8000
-const SECOND_STAR_CUTOFF = 6000
+const FIRST_STAR_CUTOFF = 7500
+const SECOND_STAR_CUTOFF = 5000
 
 // deck
 const ANCHOR = 'fa-anchor'
@@ -524,7 +523,6 @@ function gameLogic(e) {
     moves++
     if(moves%2 === 0) {
       game.scorePanel.moveCounter.update(moves/2)         // update move counter
-      currentScore -= SCORE_DECREMENT_AMOUNT_PER_MOVE     // deduct points per move
     }
 
     if(cardsBuffer.length%2 === 0) {                            // when ever the *list* of "open" cards has 2n elements 
@@ -566,7 +564,7 @@ function gameLogic(e) {
                           - CARD_DISPLAY_DURATION
                                                                 // display a modal with the final score
         game.modal.stars.update(currentStar)
-        game.modal.msg.innerHTML(`You've matched ${matched} cards in ${moves} moves, ${gameTimer/1000} seconds.`)
+        game.modal.msg.innerHTML(`You've matched ${matched} cards in ${moves/2} moves, ${gameTimer/1000} seconds.`)
         game.modal.show()                                       
       }
     }
@@ -583,10 +581,6 @@ function startGame() {
   let intervalID = setInterval(function(){
     if(!game_over) {                                        // if game is running
       currentScore -= SCORE_DECREMENT_AMOUNT_PER_INTERVAL   // currentScore - SCORE_DECREMENT_AMOUNT_PER_INTERVAL
-    }
-    else {                                                  // else
-      clearInterval(intervalID)                             // stop the score decrement and game timer
-      game.scorePanel.timer.stop()
     }
     
     // decide star rating
@@ -605,6 +599,12 @@ function startGame() {
 
     // update the star rating
     game.scorePanel.stars.showFullyFilledStars(currentStar)
+
+    if(game_over) {   // this method has to be here rather than with the if(!game_over){}else{}
+                      // otherwise it will skip the final .showFullyFilledStars() update 
+      clearInterval(intervalID)                             // stop the score decrement and game timer
+      game.scorePanel.timer.stop()
+    }
 
   }, SCORE_DECREMENT_INTERVAL)
 } 
