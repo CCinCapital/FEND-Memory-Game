@@ -566,7 +566,7 @@ function gameLogic(e) {
                           - CARD_DISPLAY_DURATION
                                                                 // display a modal with the final score
         game.modal.stars.update(currentStar)
-        game.modal.msg.innerHTML(`You've matched ${matched} cards in ${moves} moves, ${gameTimer/1000} seconds.`)
+        game.modal.msg.innerHTML(`You've matched ${matched} cards in ${moves/2} moves, ${gameTimer/1000} seconds.`)
         game.modal.show()                                       
       }
     }
@@ -583,10 +583,6 @@ function startGame() {
   let intervalID = setInterval(function(){
     if(!game_over) {                                        // if game is running
       currentScore -= SCORE_DECREMENT_AMOUNT_PER_INTERVAL   // currentScore - SCORE_DECREMENT_AMOUNT_PER_INTERVAL
-    }
-    else {                                                  // else
-      clearInterval(intervalID)                             // stop the score decrement and game timer
-      game.scorePanel.timer.stop()
     }
     
     // decide star rating
@@ -605,6 +601,12 @@ function startGame() {
 
     // update the star rating
     game.scorePanel.stars.showFullyFilledStars(currentStar)
+
+    if(game_over) {   // this method has to be here rather than with the if(!game_over){}else{} 
+                      // otherwise it will skip the final .showFullyFilledStars() update  
+      clearInterval(intervalID)                             // stop the score decrement and game timer
+      game.scorePanel.timer.stop()
+    }
 
   }, SCORE_DECREMENT_INTERVAL)
 } 
