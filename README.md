@@ -1,7 +1,9 @@
 # Memory Game Project
 
 This is a card matching game built with vanilla JavaScript, CSS, and HTML.
-[Live Preview](https://ccincapital.github.io/FEND-memory-game/)
+
+# Live Preview
+[Live Preview](https://ccincapital.github.io/FEND-memory-game/) on GitHub Pages.
 
 # About
 There are 8 pairs of cards that appear at random location on the board, player has to match all 8 pairs of cards to win the game.After game ended, a end modal will popup and user's score will be shown.
